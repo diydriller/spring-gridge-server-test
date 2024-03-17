@@ -4,11 +4,16 @@ import com.gridge.server.service.common.BaseEntity;
 import com.gridge.server.service.post.Comment;
 import com.gridge.server.service.post.Post;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.Set;
 
+@Getter
 @Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member extends BaseEntity {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
