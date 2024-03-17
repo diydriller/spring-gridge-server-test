@@ -6,7 +6,6 @@ import com.gridge.server.controller.member.dto.CreateKakaoMemberRequest;
 import com.gridge.server.controller.member.dto.CreateMemberRequest;
 import com.gridge.server.controller.member.dto.LoginRequest;
 import com.gridge.server.service.common.TokenService;
-import com.gridge.server.service.member.KakaoMemberService;
 import com.gridge.server.service.member.MemberService;
 import com.gridge.server.service.sns.KakaoRestClientService;
 import jakarta.validation.Valid;
@@ -20,7 +19,6 @@ import static com.gridge.server.common.response.BaseResponseState.SUCCESS;
 public class MemberController {
     private final MemberService memberService;
     private final KakaoRestClientService kakaoRestClientService;
-    private final KakaoMemberService kakaoMemberService;
     private final TokenService tokenService;
 
     @PostMapping("/member")
@@ -51,7 +49,7 @@ public class MemberController {
     public BaseResponse<?> createKakaoMember(
             @RequestBody @Valid CreateKakaoMemberRequest request
     ) {
-        var memberInfo = kakaoMemberService.createKakaoMember(request.getAccessToken());
+        var memberInfo = memberService.createKakaoMember(request.getAccessToken());
         return new BaseResponse<>(memberInfo);
     }
 
