@@ -47,7 +47,7 @@ public class MemberService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Member login(MemberInfo memberInfo) {
         var member = memberRepository.findByNickname(securityService.twoWayEncrypt(memberInfo.getNickname()))
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
@@ -75,5 +75,16 @@ public class MemberService {
                 .build();
         memberRepository.save(member);
         return memberInfo;
+    }
+
+    @Transactional(readOnly = true)
+    public Member kakaoLogin(String accessToken) {
+        var kakaoAccountInfo = kakaoRestClientService.getKakaoInfo(accessToken);
+        var member = memberRepository.findByNickname(securityService.twoWayEncrypt(Objects.requireNonNull(kakaoAccountInfo.getEmail())))
+                .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+        if (member.getType() != KAKAO) {
+            throw new BaseException(NOT_KAKAO_MEMBER);
+        }
+        return member;
     }
 }

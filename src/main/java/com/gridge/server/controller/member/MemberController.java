@@ -2,7 +2,7 @@ package com.gridge.server.controller.member;
 
 import com.gridge.server.common.response.BaseResponse;
 import com.gridge.server.controller.member.dto.CheckNicknameRequest;
-import com.gridge.server.controller.member.dto.CreateKakaoMemberRequest;
+import com.gridge.server.controller.member.dto.KakaoMemberRequest;
 import com.gridge.server.controller.member.dto.CreateMemberRequest;
 import com.gridge.server.controller.member.dto.LoginRequest;
 import com.gridge.server.service.common.TokenService;
@@ -47,7 +47,7 @@ public class MemberController {
 
     @PostMapping("/kakao/member")
     public BaseResponse<?> createKakaoMember(
-            @RequestBody @Valid CreateKakaoMemberRequest request
+            @RequestBody @Valid KakaoMemberRequest request
     ) {
         var memberInfo = memberService.createKakaoMember(request.getAccessToken());
         return new BaseResponse<>(memberInfo);
@@ -59,6 +59,14 @@ public class MemberController {
     ) {
         var memberInfo = request.toInfo();
         var member = memberService.login(memberInfo);
+        return new BaseResponse<>(tokenService.createToken(member.getId()));
+    }
+
+    @PostMapping("/kakao/member/login")
+    public BaseResponse<?> kakaoLogin(
+            @RequestBody @Valid KakaoMemberRequest request
+    ) {
+        var member = memberService.kakaoLogin(request.getAccessToken());
         return new BaseResponse<>(tokenService.createToken(member.getId()));
     }
 }

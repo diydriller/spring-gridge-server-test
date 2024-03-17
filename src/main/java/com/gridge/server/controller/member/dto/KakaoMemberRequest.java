@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class CreateKakaoMemberRequest {
+public class KakaoMemberRequest {
     @NotBlank(message = "토큰를 입력해주세요")
     private String accessToken;
 }
