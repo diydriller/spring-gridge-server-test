@@ -1,6 +1,8 @@
 package com.gridge.server.controller.member;
 
 import com.gridge.server.common.response.BaseResponse;
+import com.gridge.server.controller.member.dto.CheckNicknameRequest;
+import com.gridge.server.controller.member.dto.CreateMemberRequest;
 import com.gridge.server.service.member.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

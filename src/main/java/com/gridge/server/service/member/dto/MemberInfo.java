@@ -1,4 +1,4 @@
-package com.gridge.server.service.member;
+package com.gridge.server.service.member.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

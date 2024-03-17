@@ -1,8 +1,8 @@
-package com.gridge.server.service.member;
+package com.gridge.server.service.member.entity;
 
-import com.gridge.server.service.common.BaseEntity;
-import com.gridge.server.service.post.Comment;
-import com.gridge.server.service.post.Post;
+import com.gridge.server.service.common.entity.BaseEntity;
+import com.gridge.server.service.post.entity.Comment;
+import com.gridge.server.service.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.*;
 

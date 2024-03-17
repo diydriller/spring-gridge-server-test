@@ -1,4 +1,4 @@
-package com.gridge.server.service.member;
+package com.gridge.server.service.member.entity;
 
 import lombok.AllArgsConstructor;
 

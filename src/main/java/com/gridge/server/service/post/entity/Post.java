@@ -1,6 +1,6 @@
-package com.gridge.server.service.post;
+package com.gridge.server.service.post.entity;
 
-import com.gridge.server.service.member.Member;
+import com.gridge.server.service.member.entity.Member;
 import jakarta.persistence.*;
 
 import java.util.Set;

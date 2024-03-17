@@ -1,4 +1,4 @@
-package com.gridge.server.service.common;
+package com.gridge.server.service.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

@@ -1,16 +1,18 @@
 package com.gridge.server.service.member;
 
 import com.gridge.server.common.exception.BaseException;
-import com.gridge.server.common.security.SecurityService;
+import com.gridge.server.service.common.SecurityService;
 import com.gridge.server.common.util.TimeUtil;
 import com.gridge.server.dataManager.member.MemberRepository;
+import com.gridge.server.service.member.dto.MemberInfo;
+import com.gridge.server.service.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.gridge.server.common.response.BaseResponseState.NICKNAME_DUPLICATED;
-import static com.gridge.server.service.member.MemberState.ACTIVATED;
-import static com.gridge.server.service.member.MemberType.LOCAL;
+import static com.gridge.server.service.member.entity.MemberState.ACTIVATED;
+import static com.gridge.server.service.member.entity.MemberType.LOCAL;
 
 @Service
 @RequiredArgsConstructor

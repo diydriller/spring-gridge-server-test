@@ -1,7 +1,6 @@
-package com.gridge.server.common.security;
+package com.gridge.server.service.common;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.encrypt.AesBytesEncryptor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;

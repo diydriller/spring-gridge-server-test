@@ -1,6 +1,6 @@
-package com.gridge.server.controller.member;
+package com.gridge.server.controller.member.dto;
 
-import com.gridge.server.service.member.MemberInfo;
+import com.gridge.server.service.member.dto.MemberInfo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
