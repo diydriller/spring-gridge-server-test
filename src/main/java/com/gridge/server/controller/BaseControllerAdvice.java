@@ -1,7 +1,9 @@
 package com.gridge.server.controller;
 
+import com.gridge.server.common.exception.AuthenticationException;
 import com.gridge.server.common.exception.BaseException;
 import com.gridge.server.common.response.BaseResponse;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -29,6 +31,13 @@ public class BaseControllerAdvice {
                 .message("입력값이 올바르지 않습니다")
                 .code(String.join("/",errorList))
                 .build();
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseBody
+    public BaseResponse<?> handleAuthenticationException(AuthenticationException e){
+        return new BaseResponse<>(e.getState());
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)

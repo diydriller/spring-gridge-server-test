@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.gridge.server.common.response.BaseResponseState.NICKNAME_DUPLICATED;
+import static com.gridge.server.common.response.BaseResponseState.*;
 import static com.gridge.server.service.member.entity.MemberState.ACTIVATED;
 import static com.gridge.server.service.member.entity.MemberType.LOCAL;
 
@@ -40,5 +40,14 @@ public class MemberService {
         if(memberRepository.existsByNickname(securityService.twoWayEncrypt(nickname))){
             throw new BaseException(NICKNAME_DUPLICATED);
         }
+    }
+
+    public Member login(MemberInfo memberInfo) {
+        var member = memberRepository.findByNickname(securityService.twoWayEncrypt(memberInfo.getNickname()))
+                .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+        if(securityService.isOneWayEncryptionMatch(memberInfo.getPassword(), member.getPassword())) {
+            throw new BaseException(PASSWORD_NOT_MATCH);
+        }
+        return member;
     }
 }
