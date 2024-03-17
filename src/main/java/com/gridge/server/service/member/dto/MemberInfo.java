@@ -13,4 +13,5 @@ public class MemberInfo {
     private String phoneNumber;
     private String name;
     private String birthday;
+    private String imageUrl;
 }

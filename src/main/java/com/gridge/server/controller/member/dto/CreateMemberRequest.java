@@ -17,13 +17,13 @@ public class CreateMemberRequest {
     @Size(min = 6, max = 20, message = "비밀번호는 6자 이상 20자 이하로 입력해주세요")
     @NotBlank(message = "비밀번호를 입력해주세요")
     private String password;
-    @Pattern(regexp = "010\\d{8}", message = "전화번호 형식에 맞게 입력해주세요")
+    @Pattern(regexp = "^\\+\\d{1,3} \\d{2}-\\d{4}-\\d{4}$", message = "전화번호 형식에 맞게 입력해주세요")
     @NotBlank(message = "전화번호를 입력해주세요")
     private String phoneNumber;
     @Size(max = 20, message = "아이디는 20자 이하로 입력해주세요")
     @NotBlank(message = "이름를 입력해주세요")
     private String name;
-    @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2}", message = "생일 형식에 맞게 입력해주세요")
+    @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "생일 형식에 맞게 입력해주세요")
     @NotBlank(message = "생일을 입력해주세요")
     private String birthday;
 

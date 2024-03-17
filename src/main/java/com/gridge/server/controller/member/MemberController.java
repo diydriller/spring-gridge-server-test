@@ -2,13 +2,14 @@ package com.gridge.server.controller.member;
 
 import com.gridge.server.common.response.BaseResponse;
 import com.gridge.server.controller.member.dto.CheckNicknameRequest;
+import com.gridge.server.controller.member.dto.CreateKakaoMemberRequest;
 import com.gridge.server.controller.member.dto.CreateMemberRequest;
+import com.gridge.server.service.member.KakaoMemberService;
 import com.gridge.server.service.member.MemberService;
+import com.gridge.server.service.sns.KakaoRestClientService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static com.gridge.server.common.response.BaseResponseState.SUCCESS;
 
@@ -16,6 +17,8 @@ import static com.gridge.server.common.response.BaseResponseState.SUCCESS;
 @RequiredArgsConstructor
 public class MemberController {
     private final MemberService memberService;
+    private final KakaoRestClientService kakaoRestClientService;
+    private final KakaoMemberService kakaoMemberService;
 
     @PostMapping("/member")
     public BaseResponse<?> createMember(
@@ -32,5 +35,20 @@ public class MemberController {
     ) {
         memberService.checkNicknameExist(request.getNickname());
         return new BaseResponse<>(SUCCESS);
+    }
+
+    @GetMapping("/kakao/callback")
+    public BaseResponse<?> kakaoCallback(
+            @RequestParam(value = "code") String code
+    ) {
+        return new BaseResponse<>(kakaoRestClientService.getAccessToken(code));
+    }
+
+    @PostMapping("/kakao/member")
+    public BaseResponse<?> createKakaoMember(
+            @RequestBody @Valid CreateKakaoMemberRequest request
+    ) {
+        var memberInfo = kakaoMemberService.createKakaoMember(request.getAccessToken());
+        return new BaseResponse<>(memberInfo);
     }
 }

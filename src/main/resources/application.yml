@@ -14,3 +14,12 @@ spring:
 
 security:
   secret: gridge
+
+kakao:
+  url:
+    auth-url: https://kauth.kakao.com
+    api-url: https://kapi.kakao.com
+    redirect-url: http://localhost:8080/kakao/callback
+  key:
+    client-secret: K0v2JJIvzRxo5p47iXNOx8iK5mDxzcGN
+    rest-api-key: 2df027d7974cc4680e72ab1edb709dff
