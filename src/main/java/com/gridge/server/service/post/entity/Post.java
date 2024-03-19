@@ -2,22 +2,33 @@ package com.gridge.server.service.post.entity;
 
 import com.gridge.server.service.member.entity.Member;
 import jakarta.persistence.*;
+import lombok.*;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
+@Getter
 @Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
     private String content;
 
-    @ManyToOne
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostImage> postImages = new ArrayList<>();
     @OneToMany(mappedBy = "post")
-    private Set<PostImage> postImages;
-    @OneToMany(mappedBy = "post")
-    private Set<Comment> comments;
+    private List<Comment> comments = new ArrayList<>();
 
+    public void setPostImages(List<PostImage> postImages){
+        this.postImages = postImages;
+        postImages.forEach(postImage -> postImage.setPost(this));
+    }
 }

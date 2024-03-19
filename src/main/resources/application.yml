@@ -6,14 +6,19 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 security:
-  secret: gridge
+  secret:
 
 kakao:
   url:
@@ -21,5 +26,17 @@ kakao:
     api-url: https://kapi.kakao.com
     redirect-url: http://localhost:8080/kakao/callback
   key:
-    client-secret: K0v2JJIvzRxo5p47iXNOx8iK5mDxzcGN
-    rest-api-key: 2df027d7974cc4680e72ab1edb709dff
+    client-secret:
+    rest-api-key:
+
+cloud:
+  aws:
+    s3:
+      bucket: diydriller-gridge-test
+    credentials:
+      access-key:
+      secret-key:
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false

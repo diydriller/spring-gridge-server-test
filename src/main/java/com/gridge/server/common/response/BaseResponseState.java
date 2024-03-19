@@ -11,7 +11,8 @@ public enum BaseResponseState {
     AUTHENTICATION_ERROR("인증 오류", "인증에 실패했습니다"),
     MEMBER_NOT_FOUND("사용자 없음", "사용자를 찾을 수 없습니다"),
     PASSWORD_NOT_MATCH("비밀번호 불일치", "비밀번호가 일치하지 않습니다"),
-    NOT_KAKAO_MEMBER("카카오 회원 아님", "카카오 회원이 아닙니다");
+    NOT_KAKAO_MEMBER("카카오 회원 아님", "카카오 회원이 아닙니다"),
+    NOT_IMAGE_FILE("파일 업로드 오류", "이미지 파일이 아닙니다");
     private final String message;
     private final String code;
 }
