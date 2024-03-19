@@ -1,6 +1,7 @@
 package com.gridge.server.service.post.entity;
 
 import com.gridge.server.service.common.entity.BaseEntity;
+import com.gridge.server.service.common.entity.DeleteState;
 import com.gridge.server.service.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,6 +28,9 @@ public class Post extends BaseEntity {
     private List<PostImage> postImages = new ArrayList<>();
     @OneToMany(mappedBy = "post")
     private List<Comment> comments = new ArrayList<>();
+    @Column(name = "delete_state")
+    @Enumerated(EnumType.STRING)
+    private DeleteState deleteState;
 
     public void setPostImages(List<PostImage> postImages){
         this.postImages = postImages;

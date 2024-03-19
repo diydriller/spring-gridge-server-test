@@ -1,9 +1,11 @@
 package com.gridge.server.service.post;
 
+import com.gridge.server.common.exception.AuthorizationException;
 import com.gridge.server.common.exception.BaseException;
 import com.gridge.server.dataManager.post.CommentRepository;
 import com.gridge.server.dataManager.post.PostRepository;
 import com.gridge.server.service.common.FileService;
+import com.gridge.server.service.common.entity.DeleteState;
 import com.gridge.server.service.member.entity.Member;
 import com.gridge.server.service.post.dto.CommentInfo;
 import com.gridge.server.service.post.dto.PostInfo;
@@ -11,6 +13,7 @@ import com.gridge.server.service.post.entity.Comment;
 import com.gridge.server.service.post.entity.Post;
 import com.gridge.server.service.post.entity.PostImage;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -19,9 +22,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
-import static com.gridge.server.common.response.BaseResponseState.COMMENT_NOT_FOUND;
-import static com.gridge.server.common.response.BaseResponseState.POST_NOT_FOUND;
+import static com.gridge.server.common.response.BaseResponseState.*;
 
 @Service
 @RequiredArgsConstructor
@@ -71,6 +74,7 @@ public class PostService {
         var comment = Comment.builder()
                 .member(member)
                 .content(info.getContent())
+                .deleteState(DeleteState.NOT_DELETED)
                 .build();
         comment.setPost(post);
         commentRepository.save(comment);
@@ -83,7 +87,7 @@ public class PostService {
         var post = postRepository.findById(postId)
                 .orElseThrow(() -> new BaseException(POST_NOT_FOUND));
         PageRequest pageRequest = PageRequest.of(pageIndex, size, Sort.Direction.DESC, "createAt");
-        return commentRepository.findAllCommentByPost(post, pageRequest).stream()
+        return commentRepository.findAllComment(post, pageRequest).stream()
                 .map(CommentInfo::from)
                 .toList();
     }
@@ -92,8 +96,11 @@ public class PostService {
     public CommentInfo updateComment(Long postId, Long commentId, CommentInfo info, Member member) {
         var post = postRepository.findById(postId)
                 .orElseThrow(() -> new BaseException(POST_NOT_FOUND));
-        var comment = commentRepository.findComment(post, commentId, member)
+        var comment = commentRepository.findComment(post, commentId)
                 .orElseThrow(() -> new BaseException(COMMENT_NOT_FOUND));
+        if(!Objects.equals(comment.getMember().getId(), member.getId())){
+            throw new AuthorizationException(AUTHENTICATION_ERROR);
+        }
         comment.changeContent(info.getContent());
         commentRepository.save(comment);
         info.setId(comment.getId());

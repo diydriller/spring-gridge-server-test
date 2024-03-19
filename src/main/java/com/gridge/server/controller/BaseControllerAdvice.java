@@ -1,10 +1,9 @@
 package com.gridge.server.controller;
 
 import com.gridge.server.common.exception.AuthenticationException;
+import com.gridge.server.common.exception.AuthorizationException;
 import com.gridge.server.common.exception.BaseException;
 import com.gridge.server.common.response.BaseResponse;
-import com.gridge.server.common.response.BaseResponseState;
-import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -48,6 +47,13 @@ public class BaseControllerAdvice {
     @ExceptionHandler(AuthenticationException.class)
     @ResponseBody
     public BaseResponse<?> handleAuthenticationException(AuthenticationException e){
+        return new BaseResponse<>(e.getState());
+    }
+
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(AuthorizationException.class)
+    @ResponseBody
+    public BaseResponse<?> handleAuthorizationException(AuthorizationException e){
         return new BaseResponse<>(e.getState());
     }
 
