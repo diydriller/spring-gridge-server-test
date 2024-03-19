@@ -51,7 +51,7 @@ public class MemberService {
     public Member login(MemberInfo memberInfo) {
         var member = memberRepository.findByNickname(securityService.twoWayEncrypt(memberInfo.getNickname()))
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
-        if(securityService.isOneWayEncryptionMatch(memberInfo.getPassword(), member.getPassword())) {
+        if(!securityService.isOneWayEncryptionMatch(memberInfo.getPassword(), member.getPassword())) {
             throw new BaseException(PASSWORD_NOT_MATCH);
         }
         return member;
@@ -74,6 +74,7 @@ public class MemberService {
                 .type(KAKAO)
                 .build();
         memberRepository.save(member);
+        memberInfo.setId(member.getId());
         return memberInfo;
     }
 

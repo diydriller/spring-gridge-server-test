@@ -16,7 +16,9 @@ public class WebConfig implements WebMvcConfigurer {
             "/member",
             "/check/nickname",
             "/kakao/member",
-            "/kakao/callback"
+            "/kakao/callback",
+            "/member/login",
+            "/kakao/member/login"
     };
 
     @Override

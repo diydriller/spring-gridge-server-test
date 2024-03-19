@@ -30,9 +30,4 @@ public class Member extends BaseEntity {
     private String imageUrl;
     @Enumerated(EnumType.STRING)
     private MemberType type;
-
-    @OneToMany(mappedBy = "member")
-    private Set<Post> posts;
-    @OneToMany(mappedBy = "member")
-    private Set<Comment> comments;
 }

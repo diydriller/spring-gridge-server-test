@@ -1,8 +1,9 @@
 package com.gridge.server.controller;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.gridge.server.common.exception.AuthenticationException;
+import com.gridge.server.dataManager.member.MemberRepository;
 import com.gridge.server.service.common.TokenService;
-import com.gridge.server.service.member.entity.Member;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import static com.gridge.server.common.util.StringUtil.*;
 @RequiredArgsConstructor
 public class BaseInterceptor implements HandlerInterceptor {
     private final TokenService tokenService;
+    private final MemberRepository memberRepository;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
@@ -24,17 +26,17 @@ public class BaseInterceptor implements HandlerInterceptor {
             throw new AuthenticationException(AUTHENTICATION_ERROR);
         }
 
+        Long userId;
         try{
-            tokenService.verifyToken(token);
+            DecodedJWT jwt = tokenService.verifyToken(token);
+            userId = jwt.getClaim(TOKEN_CLAIM_FIELD).asLong();
         }
         catch (Exception e){
             throw new AuthenticationException(AUTHENTICATION_ERROR);
         }
 
-        Member member = (Member) request.getSession().getAttribute(SESSION_KEY);
-        if(member == null){
-            throw new AuthenticationException(AUTHENTICATION_ERROR);
-        }
+        var member = memberRepository.findById(userId).orElseThrow(()->new AuthenticationException(AUTHENTICATION_ERROR));
+        request.setAttribute("member", member);
 
         return true;
     }
