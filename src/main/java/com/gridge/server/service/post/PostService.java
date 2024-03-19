@@ -67,6 +67,30 @@ public class PostService {
     }
 
     @Transactional
+    public PostInfo updatePost(Long postId, PostInfo info, Member member) {
+        var post = postRepository.findById(postId)
+                .orElseThrow(() -> new BaseException(POST_NOT_FOUND));
+        if(!Objects.equals(post.getMember().getId(), member.getId())){
+            throw new AuthorizationException(AUTHORIZATION_ERROR);
+        }
+        post.changeContent(info.getContent());
+        postRepository.save(post);
+        info.setId(post.getId());
+        return info;
+    }
+
+    @Transactional
+    public void deletePost(Long postId, Member member) {
+        var post = postRepository.findById(postId)
+                .orElseThrow(() -> new BaseException(POST_NOT_FOUND));
+        if(!Objects.equals(post.getMember().getId(), member.getId())){
+            throw new AuthorizationException(AUTHORIZATION_ERROR);
+        }
+        post.delete();
+        postRepository.save(post);
+    }
+
+    @Transactional
     public CommentInfo createComment(Long postId, CommentInfo info, Member member) {
         var post = postRepository.findById(postId)
                 .orElseThrow(() -> new BaseException(POST_NOT_FOUND));

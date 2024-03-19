@@ -3,6 +3,7 @@ package com.gridge.server.controller.post;
 import com.gridge.server.common.response.BaseResponse;
 import com.gridge.server.controller.post.dto.CommentRequest;
 import com.gridge.server.controller.post.dto.CreatePostRequest;
+import com.gridge.server.controller.post.dto.UpdatePostRequest;
 import com.gridge.server.service.member.entity.Member;
 import com.gridge.server.service.post.PostService;
 import jakarta.validation.Valid;
@@ -33,6 +34,24 @@ public class PostController {
             @RequestAttribute("member") Member member
     ) {
         return new BaseResponse<>(postService.getPosts(pageIndex, size));
+    }
+
+    @PutMapping("/post/{postId}")
+    public BaseResponse<?> updatePost(
+            @PathVariable("postId") Long postId,
+            @RequestBody @Valid UpdatePostRequest request,
+            @RequestAttribute("member") Member member
+    ) {
+        return new BaseResponse<>(postService.updatePost(postId, request.toInfo(), member));
+    }
+
+    @DeleteMapping("/post/{postId}")
+    public BaseResponse<?> deletePost(
+            @PathVariable("postId") Long postId,
+            @RequestAttribute("member") Member member
+    ) {
+        postService.deletePost(postId, member);
+        return new BaseResponse<>(SUCCESS);
     }
 
     @PostMapping("/post/{postId}/comment")

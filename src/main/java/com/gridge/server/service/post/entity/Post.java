@@ -36,4 +36,12 @@ public class Post extends BaseEntity {
         this.postImages = postImages;
         postImages.forEach(postImage -> postImage.setPost(this));
     }
+
+    public void changeContent(String content) {
+        this.content = content;
+    }
+
+    public void delete() {
+        this.deleteState = DeleteState.DELETED;
+    }
 }
