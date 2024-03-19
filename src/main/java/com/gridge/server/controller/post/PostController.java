@@ -2,6 +2,7 @@ package com.gridge.server.controller.post;
 
 import com.gridge.server.common.response.BaseResponse;
 import com.gridge.server.controller.post.dto.CommentRequest;
+import com.gridge.server.controller.post.dto.CreatePostReportRequest;
 import com.gridge.server.controller.post.dto.CreatePostRequest;
 import com.gridge.server.controller.post.dto.UpdatePostRequest;
 import com.gridge.server.service.member.entity.Member;
@@ -89,6 +90,16 @@ public class PostController {
             @RequestAttribute("member") Member member
     ) {
         postService.deleteComment(postId, commentId, member);
+        return new BaseResponse<>(SUCCESS);
+    }
+
+    @PostMapping("/post/{postId}/report")
+    public BaseResponse<?> reportPost(
+            @PathVariable("postId") Long postId,
+            @RequestBody @Valid CreatePostReportRequest request,
+            @RequestAttribute("member") Member member
+    ) {
+        postService.reportPost(postId, request.toInfo(), member);
         return new BaseResponse<>(SUCCESS);
     }
 }

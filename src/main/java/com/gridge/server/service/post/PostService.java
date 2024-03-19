@@ -3,15 +3,18 @@ package com.gridge.server.service.post;
 import com.gridge.server.common.exception.AuthorizationException;
 import com.gridge.server.common.exception.BaseException;
 import com.gridge.server.dataManager.post.CommentRepository;
+import com.gridge.server.dataManager.post.PostReportRepository;
 import com.gridge.server.dataManager.post.PostRepository;
 import com.gridge.server.service.common.FileService;
 import com.gridge.server.service.common.entity.DeleteState;
 import com.gridge.server.service.member.entity.Member;
 import com.gridge.server.service.post.dto.CommentInfo;
 import com.gridge.server.service.post.dto.PostInfo;
+import com.gridge.server.service.post.dto.PostReportInfo;
 import com.gridge.server.service.post.entity.Comment;
 import com.gridge.server.service.post.entity.Post;
 import com.gridge.server.service.post.entity.PostImage;
+import com.gridge.server.service.post.entity.PostReport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -31,6 +34,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final FileService fileService;
     private final CommentRepository commentRepository;
+    private final PostReportRepository postReportRepository;
 
     @Transactional
     public PostInfo createPost(PostInfo info, List<MultipartFile> files, Member member) {
@@ -141,5 +145,22 @@ public class PostService {
         }
         comment.delete();
         commentRepository.save(comment);
+    }
+
+    @Transactional
+    public void reportPost(Long postId, PostReportInfo info, Member member) {
+        var post = postRepository.findById(postId)
+                .orElseThrow(() -> new BaseException(POST_NOT_FOUND));
+        var postReport = PostReport.builder()
+                .content(info.getContent())
+                .build();
+        postReport.setPost(post);
+        postReport.setMember(member);
+        postReportRepository.save(postReport);
+        long reportCount = postReportRepository.countPostReport(post);
+        if(reportCount >= 10){
+            post.delete();
+            postRepository.save(post);
+        }
     }
 }

@@ -19,6 +19,9 @@ public class Post extends BaseEntity {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
     private String content;
+    @Column(name = "delete_state")
+    @Enumerated(EnumType.STRING)
+    private DeleteState deleteState;
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
@@ -28,9 +31,8 @@ public class Post extends BaseEntity {
     private List<PostImage> postImages = new ArrayList<>();
     @OneToMany(mappedBy = "post")
     private List<Comment> comments = new ArrayList<>();
-    @Column(name = "delete_state")
-    @Enumerated(EnumType.STRING)
-    private DeleteState deleteState;
+    @OneToMany(mappedBy = "post")
+    private List<PostReport> postReports = new ArrayList<>();
 
     public void setPostImages(List<PostImage> postImages){
         this.postImages = postImages;
