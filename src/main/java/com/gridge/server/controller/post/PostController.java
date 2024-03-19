@@ -1,7 +1,7 @@
 package com.gridge.server.controller.post;
 
 import com.gridge.server.common.response.BaseResponse;
-import com.gridge.server.controller.post.dto.CreateCommentRequest;
+import com.gridge.server.controller.post.dto.CommentRequest;
 import com.gridge.server.controller.post.dto.CreatePostRequest;
 import com.gridge.server.service.member.entity.Member;
 import com.gridge.server.service.post.PostService;
@@ -36,7 +36,7 @@ public class PostController {
     @PostMapping("/post/{postId}/comment")
     public BaseResponse<?> createComment(
             @PathVariable("postId") Long postId,
-            @RequestBody @Valid CreateCommentRequest request,
+            @RequestBody @Valid CommentRequest request,
             @RequestAttribute("member") Member member
     ) {
         return new BaseResponse<>(postService.createComment(postId, request.toInfo(), member));
@@ -49,5 +49,15 @@ public class PostController {
             @RequestParam("size") int size
     ) {
         return new BaseResponse<>(postService.getComments(postId, pageIndex, size));
+    }
+
+    @PutMapping("/post/{postId}/comment/{commentId}")
+    public BaseResponse<?> updateComment(
+            @PathVariable("postId") Long postId,
+            @PathVariable("commentId") Long commentId,
+            @RequestBody @Valid CommentRequest request,
+            @RequestAttribute("member") Member member
+    ) {
+        return new BaseResponse<>(postService.updateComment(postId, commentId, request.toInfo(), member));
     }
 }

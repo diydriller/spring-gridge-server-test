@@ -1,5 +1,6 @@
 package com.gridge.server.dataManager.post;
 
+import com.gridge.server.service.member.entity.Member;
 import com.gridge.server.service.post.entity.Comment;
 import com.gridge.server.service.post.entity.Post;
 import org.springframework.data.domain.PageRequest;
@@ -9,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long>{
@@ -17,4 +19,10 @@ public interface CommentRepository extends JpaRepository<Comment, Long>{
             @Param("post") Post post,
             PageRequest pageRequest
     );
+
+    @Query("SELECT c FROM Comment c WHERE c.post =:post AND c.id = :commentId AND c.member = :member")
+    Optional<Comment> findComment(
+            @Param("post") Post post,
+            @Param("commentId") Long commentId,
+            @Param("member") Member member);
 }

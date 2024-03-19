@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class CreateCommentRequest {
+public class CommentRequest {
     @Size(max = 100, message = "댓글 내용은 100자 이하로 입력해주세요")
     @NotBlank(message = "댓글 내용을 입력해주세요")
     private String content;

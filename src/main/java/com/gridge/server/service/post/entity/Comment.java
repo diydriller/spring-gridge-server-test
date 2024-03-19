@@ -27,4 +27,8 @@ public class Comment extends BaseEntity {
         this.post = post;
         this.post.getComments().add(this);
     }
+
+    public void changeContent(String content){
+        this.content = content;
+    }
 }

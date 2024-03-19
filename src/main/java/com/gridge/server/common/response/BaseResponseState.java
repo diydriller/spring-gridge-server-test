@@ -14,7 +14,8 @@ public enum BaseResponseState {
     NOT_KAKAO_MEMBER("카카오 회원 아님", "카카오 회원이 아닙니다"),
     NOT_IMAGE_FILE("파일 업로드 오류", "이미지 파일이 아닙니다"),
     MISSING_PARAMETER("요청 오류", "필수 파라미터가 누락되었습니다"),
-    POST_NOT_FOUND("게시글 없음", "게시글을 찾을 수 없습니다");
+    POST_NOT_FOUND("게시글 없음", "게시글을 찾을 수 없습니다"),
+    COMMENT_NOT_FOUND("댓글 없음", "댓글을 찾을 수 없습니다");
     private final String message;
     private final String code;
 }

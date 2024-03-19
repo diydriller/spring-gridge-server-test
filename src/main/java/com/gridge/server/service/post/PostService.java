@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
+import static com.gridge.server.common.response.BaseResponseState.COMMENT_NOT_FOUND;
 import static com.gridge.server.common.response.BaseResponseState.POST_NOT_FOUND;
 
 @Service
@@ -85,5 +86,17 @@ public class PostService {
         return commentRepository.findAllCommentByPost(post, pageRequest).stream()
                 .map(CommentInfo::from)
                 .toList();
+    }
+
+    @Transactional
+    public CommentInfo updateComment(Long postId, Long commentId, CommentInfo info, Member member) {
+        var post = postRepository.findById(postId)
+                .orElseThrow(() -> new BaseException(POST_NOT_FOUND));
+        var comment = commentRepository.findComment(post, commentId, member)
+                .orElseThrow(() -> new BaseException(COMMENT_NOT_FOUND));
+        comment.changeContent(info.getContent());
+        commentRepository.save(comment);
+        info.setId(comment.getId());
+        return info;
     }
 }
