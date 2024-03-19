@@ -3,10 +3,12 @@ package com.gridge.server.controller;
 import com.gridge.server.common.exception.AuthenticationException;
 import com.gridge.server.common.exception.BaseException;
 import com.gridge.server.common.response.BaseResponse;
+import com.gridge.server.common.response.BaseResponseState;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.gridge.server.common.response.BaseResponseState.MISSING_PARAMETER;
 
 @RestControllerAdvice
 public class BaseControllerAdvice {
@@ -28,9 +32,16 @@ public class BaseControllerAdvice {
                 errorList.add(fieldError.getDefaultMessage())
         );
         return BaseResponse.builder()
-                .message("입력값이 올바르지 않습니다")
+                .message("요청 오류")
                 .code(String.join("/",errorList))
                 .build();
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseBody
+    public BaseResponse<?> handleMissingParameterException(){
+        return new BaseResponse<>(MISSING_PARAMETER);
     }
 
     @ResponseStatus(HttpStatus.UNAUTHORIZED)

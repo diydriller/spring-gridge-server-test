@@ -7,6 +7,8 @@ import com.gridge.server.service.post.dto.PostInfo;
 import com.gridge.server.service.post.entity.Post;
 import com.gridge.server.service.post.entity.PostImage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,5 +46,13 @@ public class PostService {
 
         info.setId(post.getId());
         return info;
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostInfo> getPosts(int pageIndex, int size) {
+        PageRequest pageRequest = PageRequest.of(pageIndex, size, Sort.Direction.DESC, "createAt");
+        return postRepository.findAllPost(pageRequest).stream()
+                .map(PostInfo::from)
+                .toList();
     }
 }

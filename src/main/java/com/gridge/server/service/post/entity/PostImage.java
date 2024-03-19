@@ -1,5 +1,6 @@
 package com.gridge.server.service.post.entity;
 
+import com.gridge.server.service.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,7 +9,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PostImage {
+public class PostImage extends BaseEntity{
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;

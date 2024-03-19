@@ -1,5 +1,7 @@
 package com.gridge.server.service.post.dto;
 
+import com.gridge.server.service.post.entity.Post;
+import com.gridge.server.service.post.entity.PostImage;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,4 +19,14 @@ public class PostInfo {
     private String content;
     @Builder.Default
     private List<String> imageUrls = new ArrayList<>();
+
+    public static PostInfo from(Post post) {
+        return PostInfo.builder()
+                .id(post.getId())
+                .content(post.getContent())
+                .imageUrls(post.getPostImages().stream()
+                        .map(PostImage::getImageUrl)
+                        .toList())
+                .build();
+    }
 }
