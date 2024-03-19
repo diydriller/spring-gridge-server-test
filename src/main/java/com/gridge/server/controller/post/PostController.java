@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import static com.gridge.server.common.response.BaseResponseState.SUCCESS;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -59,5 +61,15 @@ public class PostController {
             @RequestAttribute("member") Member member
     ) {
         return new BaseResponse<>(postService.updateComment(postId, commentId, request.toInfo(), member));
+    }
+
+    @DeleteMapping("/post/{postId}/comment/{commentId}")
+    public BaseResponse<?> deleteComment(
+            @PathVariable("postId") Long postId,
+            @PathVariable("commentId") Long commentId,
+            @RequestAttribute("member") Member member
+    ) {
+        postService.deleteComment(postId, commentId, member);
+        return new BaseResponse<>(SUCCESS);
     }
 }

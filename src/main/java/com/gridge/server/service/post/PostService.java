@@ -13,7 +13,6 @@ import com.gridge.server.service.post.entity.Comment;
 import com.gridge.server.service.post.entity.Post;
 import com.gridge.server.service.post.entity.PostImage;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -99,11 +98,24 @@ public class PostService {
         var comment = commentRepository.findComment(post, commentId)
                 .orElseThrow(() -> new BaseException(COMMENT_NOT_FOUND));
         if(!Objects.equals(comment.getMember().getId(), member.getId())){
-            throw new AuthorizationException(AUTHENTICATION_ERROR);
+            throw new AuthorizationException(AUTHORIZATION_ERROR);
         }
         comment.changeContent(info.getContent());
         commentRepository.save(comment);
         info.setId(comment.getId());
         return info;
+    }
+
+    @Transactional
+    public void deleteComment(Long postId, Long commentId, Member member) {
+        var post = postRepository.findById(postId)
+                .orElseThrow(() -> new BaseException(POST_NOT_FOUND));
+        var comment = commentRepository.findComment(post, commentId)
+                .orElseThrow(() -> new BaseException(COMMENT_NOT_FOUND));
+        if(!Objects.equals(comment.getMember().getId(), member.getId())){
+            throw new AuthorizationException(AUTHORIZATION_ERROR);
+        }
+        comment.delete();
+        commentRepository.save(comment);
     }
 }
