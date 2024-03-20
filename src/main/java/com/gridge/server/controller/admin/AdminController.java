@@ -2,6 +2,7 @@ package com.gridge.server.controller.admin;
 
 import com.gridge.server.common.exception.AuthorizationException;
 import com.gridge.server.common.response.BaseResponse;
+import com.gridge.server.service.history.HistoryService;
 import com.gridge.server.service.member.MemberService;
 import com.gridge.server.service.member.entity.Member;
 import com.gridge.server.service.post.PostService;
@@ -20,6 +21,8 @@ import static com.gridge.server.service.member.entity.MemberType.ADMIN;
 public class AdminController {
     private final MemberService memberService;
     private final PostService postService;
+    private final HistoryService historyService;
+
     @GetMapping("/admin/member")
     public BaseResponse<?> getMembersByAdmin(
             @RequestParam(name = "name") String name,
@@ -106,6 +109,17 @@ public class AdminController {
         checkAdmin(member);
         postService.deleteReportByAdmin(id, member);
         return new BaseResponse<>(SUCCESS);
+    }
+
+    @GetMapping("/admin/history")
+    public BaseResponse<?> getHistoryByAdmin(
+            @RequestParam(name = "pageIndex") int pageIndex,
+            @RequestParam(name = "size") int size,
+            @RequestAttribute("member") Member member
+    ){
+        checkAdmin(member);
+        PageRequest pageRequest = PageRequest.of(pageIndex, size, Sort.Direction.DESC, "createAt");
+        return new BaseResponse<>(historyService.getHistoryByAdmin(pageRequest, member));
     }
 
     private void checkAdmin(Member member) {
