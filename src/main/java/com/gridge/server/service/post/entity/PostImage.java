@@ -1,6 +1,7 @@
 package com.gridge.server.service.post.entity;
 
 import com.gridge.server.service.common.entity.BaseEntity;
+import com.gridge.server.service.common.entity.DeleteState;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,6 +16,7 @@ public class PostImage extends BaseEntity{
     private Long id;
     @Column(name = "image_url")
     private String imageUrl;
+    private DeleteState deleteState;
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)

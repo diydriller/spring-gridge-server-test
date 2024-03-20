@@ -1,7 +1,5 @@
 package com.gridge.server.dataManager.post;
 
-import com.gridge.server.service.common.entity.DeleteState;
-import com.gridge.server.service.member.entity.Member;
 import com.gridge.server.service.post.entity.Comment;
 import com.gridge.server.service.post.entity.Post;
 import org.springframework.data.domain.PageRequest;

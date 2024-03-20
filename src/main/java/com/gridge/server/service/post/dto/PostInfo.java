@@ -19,6 +19,8 @@ public class PostInfo {
     private String content;
     @Builder.Default
     private List<String> imageUrls = new ArrayList<>();
+    private String creatAt;
+    private String updateAt;
 
     public static PostInfo from(Post post) {
         return PostInfo.builder()
@@ -27,6 +29,8 @@ public class PostInfo {
                 .imageUrls(post.getPostImages().stream()
                         .map(PostImage::getImageUrl)
                         .toList())
+                .creatAt(post.getCreateAt().toString())
+                .updateAt(post.getUpdateAt().toString())
                 .build();
     }
 }

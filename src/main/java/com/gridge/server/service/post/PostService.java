@@ -2,11 +2,13 @@ package com.gridge.server.service.post;
 
 import com.gridge.server.common.exception.AuthorizationException;
 import com.gridge.server.common.exception.BaseException;
+import com.gridge.server.common.util.TimeUtil;
+import com.gridge.server.dataManager.member.MemberRepository;
 import com.gridge.server.dataManager.post.CommentRepository;
 import com.gridge.server.dataManager.post.PostReportRepository;
 import com.gridge.server.dataManager.post.PostRepository;
+import com.gridge.server.dataManager.post.PostSpecification;
 import com.gridge.server.service.common.FileService;
-import com.gridge.server.service.common.entity.DeleteState;
 import com.gridge.server.service.member.entity.Member;
 import com.gridge.server.service.post.dto.CommentInfo;
 import com.gridge.server.service.post.dto.PostInfo;
@@ -18,15 +20,18 @@ import com.gridge.server.service.post.entity.PostReport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
 import static com.gridge.server.common.response.BaseResponseState.*;
+import static com.gridge.server.service.common.entity.DeleteState.NOT_DELETED;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +40,7 @@ public class PostService {
     private final FileService fileService;
     private final CommentRepository commentRepository;
     private final PostReportRepository postReportRepository;
+    private final MemberRepository memberRepository;
 
     @Transactional
     public PostInfo createPost(PostInfo info, List<MultipartFile> files, Member member) {
@@ -53,6 +59,7 @@ public class PostService {
                 }).toList();
         var post = Post.builder()
                 .content(info.getContent())
+                .deleteState(NOT_DELETED)
                 .build();
         post.setPostImages(postImages);
         post.setMember(member);
@@ -101,7 +108,7 @@ public class PostService {
         var comment = Comment.builder()
                 .member(member)
                 .content(info.getContent())
-                .deleteState(DeleteState.NOT_DELETED)
+                .deleteState(NOT_DELETED)
                 .build();
         comment.setPost(post);
         commentRepository.save(comment);
@@ -162,5 +169,34 @@ public class PostService {
             post.delete();
             postRepository.save(post);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostInfo> getPosts(String nickname, String dateString, String state, PageRequest pageRequest) {
+        LocalDate date = TimeUtil.stringToLocalDate(dateString);
+        var member = memberRepository.findByNickname(nickname)
+                .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+        var spec = Specification.where((PostSpecification.equalMember(member))
+                .and(PostSpecification.betweenCreateDate(TimeUtil.startOfDate(date), TimeUtil.endOfDate(date)))
+                .and(PostSpecification.equalState(state)));
+        return postRepository.findAll(spec, pageRequest).stream()
+                .map(PostInfo::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public PostInfo getPost(long id) {
+        var post = postRepository.findById(id)
+                .orElseThrow(() -> new BaseException(POST_NOT_FOUND));
+        return PostInfo.from(post);
+    }
+
+    @Transactional
+    public void deletePost(long id) {
+        var post = postRepository.findById(id)
+                .orElseThrow(() -> new BaseException(POST_NOT_FOUND));
+        post.delete();
+        postRepository.save(post);
+        postRepository.deleteAllComment(post);
+        postRepository.deleteAllPostImage(post);
     }
 }
