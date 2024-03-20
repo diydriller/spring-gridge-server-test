@@ -112,7 +112,27 @@ public class MemberService {
                         .name(securityService.twoWayDecrypt(member.getName()))
                         .phoneNumber(securityService.twoWayDecrypt(member.getPhoneNumber()))
                         .birthday(member.getBirthday().toString())
+                        .createAt(member.getCreateAt().toString())
+                        .updateAt(member.getUpdateAt().toString())
+                        .lastLoginAt(member.getLastLoginAt().toString())
                         .build())
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public MemberInfo getMember(long id) {
+        var member = memberRepository.findById(id)
+                .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+        return MemberInfo.builder()
+                .nickname(securityService.twoWayDecrypt(member.getNickname()))
+                .id(member.getId())
+                .imageUrl(member.getImageUrl())
+                .name(securityService.twoWayDecrypt(member.getName()))
+                .phoneNumber(securityService.twoWayDecrypt(member.getPhoneNumber()))
+                .birthday(member.getBirthday().toString())
+                .createAt(member.getCreateAt().toString())
+                .updateAt(member.getUpdateAt().toString())
+                .lastLoginAt(member.getLastLoginAt().toString())
+                .build();
     }
 }

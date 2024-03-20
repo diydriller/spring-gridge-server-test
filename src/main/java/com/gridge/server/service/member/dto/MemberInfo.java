@@ -17,4 +17,7 @@ public class MemberInfo {
     private String name;
     private String birthday;
     private String imageUrl;
+    private String lastLoginAt;
+    private String createAt;
+    private String updateAt;
 }
