@@ -33,4 +33,7 @@ public class Member extends BaseEntity {
     public void updateLastLoginAt() {
         lastLoginAt = LocalDateTime.now();
     }
+    public void suspend() {
+        state = MemberState.SUSPENDED;
+    }
 }

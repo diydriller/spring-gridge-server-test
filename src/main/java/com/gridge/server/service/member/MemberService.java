@@ -135,4 +135,12 @@ public class MemberService {
                 .lastLoginAt(member.getLastLoginAt().toString())
                 .build();
     }
+
+    @Transactional
+    public void suspendMember(long id) {
+        var member = memberRepository.findById(id)
+                .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+        member.suspend();
+        memberRepository.save(member);
+    }
 }
