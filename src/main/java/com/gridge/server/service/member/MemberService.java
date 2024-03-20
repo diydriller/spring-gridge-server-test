@@ -52,13 +52,15 @@ public class MemberService {
         }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public Member login(MemberInfo memberInfo) {
         var member = memberRepository.findByNickname(securityService.twoWayEncrypt(memberInfo.getNickname()))
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
         if(!securityService.isOneWayEncryptionMatch(memberInfo.getPassword(), member.getPassword())) {
             throw new BaseException(PASSWORD_NOT_MATCH);
         }
+        member.updateLastLoginAt();
+        memberRepository.save(member);
         return member;
     }
 
@@ -83,7 +85,7 @@ public class MemberService {
         return memberInfo;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public Member kakaoLogin(String accessToken) {
         var kakaoAccountInfo = kakaoRestClientService.getKakaoInfo(accessToken);
         var member = memberRepository.findByNickname(securityService.twoWayEncrypt(Objects.requireNonNull(kakaoAccountInfo.getEmail())))
@@ -91,6 +93,8 @@ public class MemberService {
         if (member.getType() != KAKAO) {
             throw new BaseException(NOT_KAKAO_MEMBER);
         }
+        member.updateLastLoginAt();
+        memberRepository.save(member);
         return member;
     }
 

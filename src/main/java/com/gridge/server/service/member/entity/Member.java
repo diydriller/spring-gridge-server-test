@@ -1,13 +1,11 @@
 package com.gridge.server.service.member.entity;
 
 import com.gridge.server.service.common.entity.BaseEntity;
-import com.gridge.server.service.post.entity.Comment;
-import com.gridge.server.service.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.Set;
+import java.time.LocalDateTime;
 
 @Getter
 @Entity
@@ -30,4 +28,9 @@ public class Member extends BaseEntity {
     private String imageUrl;
     @Enumerated(EnumType.STRING)
     private MemberType type;
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
+    public void updateLastLoginAt() {
+        lastLoginAt = LocalDateTime.now();
+    }
 }
