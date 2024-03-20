@@ -16,6 +16,8 @@ public class PostImage extends BaseEntity{
     private Long id;
     @Column(name = "image_url")
     private String imageUrl;
+    @Column(name = "delete_state")
+    @Enumerated(EnumType.STRING)
     private DeleteState deleteState;
 
     @Setter

@@ -78,4 +78,23 @@ public class AdminController {
         postService.deletePost(id);
         return new BaseResponse<>(SUCCESS);
     }
+
+    @GetMapping("/admin/report")
+    public BaseResponse<?> getReports(
+            @RequestParam(name = "pageIndex") int pageIndex,
+            @RequestParam(name = "size") int size,
+            @RequestAttribute("member") Member member
+    ){
+        PageRequest pageRequest = PageRequest.of(pageIndex, size, Sort.Direction.DESC, "createAt");
+        return new BaseResponse<>(postService.getReports(pageRequest));
+    }
+
+    @DeleteMapping("/admin/report/{id}")
+    public BaseResponse<?> deleteReport(
+            @PathVariable(name = "id") long id,
+            @RequestAttribute("member") Member member
+    ) {
+        postService.deleteReport(id);
+        return new BaseResponse<>(SUCCESS);
+    }
 }

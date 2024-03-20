@@ -2,6 +2,7 @@ package com.gridge.server.service.post.entity;
 
 
 import com.gridge.server.service.common.entity.BaseEntity;
+import com.gridge.server.service.common.entity.DeleteState;
 import com.gridge.server.service.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,6 +17,9 @@ public class PostReport extends BaseEntity {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
     private String content;
+    @Column(name = "delete_state")
+    @Enumerated(EnumType.STRING)
+    private DeleteState deleteState;
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
@@ -28,5 +32,8 @@ public class PostReport extends BaseEntity {
     public void setPost(Post post){
         this.post = post;
         this.post.getPostReports().add(this);
+    }
+    public void delete(){
+        this.deleteState = DeleteState.DELETED;
     }
 }

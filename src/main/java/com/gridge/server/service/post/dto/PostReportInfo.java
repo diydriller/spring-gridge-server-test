@@ -12,4 +12,7 @@ import lombok.Setter;
 public class PostReportInfo {
     private Long id;
     private String content;
+    private String nickname;
+    private String createAt;
+    private String updateAt;
 }

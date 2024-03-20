@@ -17,8 +17,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
     Optional<Post> findById(@Param("id") Long id);
     @Query("SELECT p FROM Post p WHERE p.deleteState = 'NOT_DELETED'")
     List<Post> findAllPost(Pageable pageable);
-    @Query("UPDATE Comment c SET c.deleteState = 'DELETED' WHERE c.post = :post")
-    void deleteAllComment(@Param("post") Post post);
     @Query("UPDATE PostImage pi SET pi.deleteState = 'DELETED' WHERE pi.post = :post")
     void deleteAllPostImage(@Param("post") Post post);
 }

@@ -9,6 +9,7 @@ import com.gridge.server.dataManager.post.PostReportRepository;
 import com.gridge.server.dataManager.post.PostRepository;
 import com.gridge.server.dataManager.post.PostSpecification;
 import com.gridge.server.service.common.FileService;
+import com.gridge.server.service.common.SecurityService;
 import com.gridge.server.service.member.entity.Member;
 import com.gridge.server.service.post.dto.CommentInfo;
 import com.gridge.server.service.post.dto.PostInfo;
@@ -41,6 +42,7 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final PostReportRepository postReportRepository;
     private final MemberRepository memberRepository;
+    private final SecurityService securityService;
 
     @Transactional
     public PostInfo createPost(PostInfo info, List<MultipartFile> files, Member member) {
@@ -196,7 +198,28 @@ public class PostService {
                 .orElseThrow(() -> new BaseException(POST_NOT_FOUND));
         post.delete();
         postRepository.save(post);
-        postRepository.deleteAllComment(post);
+        commentRepository.deleteAllComment(post);
         postRepository.deleteAllPostImage(post);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostReportInfo> getReports(PageRequest pageRequest) {
+        return postReportRepository.findAllPostReport(pageRequest).stream()
+                .map(postReport -> PostReportInfo.builder()
+                        .id(postReport.getId())
+                        .content(postReport.getContent())
+                        .nickname(securityService.twoWayDecrypt(postReport.getMember().getNickname()))
+                        .createAt(postReport.getCreateAt().toString())
+                        .updateAt(postReport.getUpdateAt().toString())
+                        .build())
+                .toList();
+    }
+
+    @Transactional
+    public void deleteReport(long id) {
+        var postReport = postReportRepository.findById(id)
+                .orElseThrow(() -> new BaseException(REPORT_NOT_FOUND));
+        postReport.delete();
+        postReportRepository.save(postReport);
     }
 }

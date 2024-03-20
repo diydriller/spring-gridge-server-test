@@ -18,9 +18,10 @@ public interface CommentRepository extends JpaRepository<Comment, Long>{
             @Param("post") Post post,
             PageRequest pageRequest
     );
-
     @Query("SELECT c FROM Comment c WHERE c.post =:post AND c.id = :commentId AND c.deleteState = 'NOT_DELETED'")
     Optional<Comment> findComment(
             @Param("post") Post post,
             @Param("commentId") Long commentId);
+    @Query("UPDATE Comment c SET c.deleteState = 'DELETED' WHERE c.post = :post")
+    void deleteAllComment(@Param("post") Post post);
 }
