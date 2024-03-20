@@ -9,6 +9,8 @@ import com.gridge.server.service.member.entity.Member;
 import com.gridge.server.service.post.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import static com.gridge.server.common.response.BaseResponseState.SUCCESS;
@@ -34,7 +36,7 @@ public class PostController {
             @RequestParam("size") int size,
             @RequestAttribute("member") Member member
     ) {
-        return new BaseResponse<>(postService.getPosts(pageIndex, size));
+        return new BaseResponse<>(postService.getPosts(pageIndex, size, member));
     }
 
     @PutMapping("/post/{postId}")
@@ -68,9 +70,11 @@ public class PostController {
     public BaseResponse<?> getComments(
             @PathVariable("postId") Long postId,
             @RequestParam("pageIndex") int pageIndex,
-            @RequestParam("size") int size
+            @RequestParam("size") int size,
+            @RequestAttribute("member") Member member
     ) {
-        return new BaseResponse<>(postService.getComments(postId, pageIndex, size));
+        PageRequest pageRequest = PageRequest.of(pageIndex, size, Sort.Direction.DESC, "createAt");
+        return new BaseResponse<>(postService.getComments(postId, pageRequest, member));
     }
 
     @PutMapping("/post/{postId}/comment/{commentId}")

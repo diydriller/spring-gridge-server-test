@@ -10,6 +10,7 @@ import com.gridge.server.dataManager.post.PostRepository;
 import com.gridge.server.dataManager.post.PostSpecification;
 import com.gridge.server.service.common.FileService;
 import com.gridge.server.service.common.SecurityService;
+import com.gridge.server.service.history.event.HistoryEvent;
 import com.gridge.server.service.member.entity.Member;
 import com.gridge.server.service.post.dto.CommentInfo;
 import com.gridge.server.service.post.dto.PostInfo;
@@ -19,6 +20,7 @@ import com.gridge.server.service.post.entity.Post;
 import com.gridge.server.service.post.entity.PostImage;
 import com.gridge.server.service.post.entity.PostReport;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -33,6 +35,7 @@ import java.util.Objects;
 
 import static com.gridge.server.common.response.BaseResponseState.*;
 import static com.gridge.server.service.common.entity.DeleteState.NOT_DELETED;
+import static com.gridge.server.service.history.entity.HistoryType.*;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +46,7 @@ public class PostService {
     private final PostReportRepository postReportRepository;
     private final MemberRepository memberRepository;
     private final SecurityService securityService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public PostInfo createPost(PostInfo info, List<MultipartFile> files, Member member) {
@@ -66,17 +70,31 @@ public class PostService {
         post.setPostImages(postImages);
         post.setMember(member);
         postRepository.save(post);
-
         info.setId(post.getId());
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(member)
+                        .type(POST)
+                        .build()
+        );
         return info;
     }
 
     @Transactional(readOnly = true)
-    public List<PostInfo> getPosts(int pageIndex, int size) {
+    public List<PostInfo> getPosts(int pageIndex, int size, Member member) {
         PageRequest pageRequest = PageRequest.of(pageIndex, size, Sort.Direction.DESC, "createAt");
-        return postRepository.findAllPost(pageRequest).stream()
+        var result = postRepository.findAllPost(pageRequest).stream()
                 .map(PostInfo::from)
                 .toList();
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(member)
+                        .type(POST)
+                        .build()
+        );
+        return result;
     }
 
     @Transactional
@@ -89,6 +107,13 @@ public class PostService {
         post.changeContent(info.getContent());
         postRepository.save(post);
         info.setId(post.getId());
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(member)
+                        .type(POST)
+                        .build()
+        );
         return info;
     }
 
@@ -101,6 +126,13 @@ public class PostService {
         }
         post.delete();
         postRepository.save(post);
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(member)
+                        .type(POST)
+                        .build()
+        );
     }
 
     @Transactional
@@ -115,17 +147,31 @@ public class PostService {
         comment.setPost(post);
         commentRepository.save(comment);
         info.setId(comment.getId());
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(member)
+                        .type(COMMENT)
+                        .build()
+        );
         return info;
     }
 
     @Transactional(readOnly = true)
-    public List<CommentInfo> getComments(Long postId, int pageIndex, int size) {
+    public List<CommentInfo> getComments(Long postId, PageRequest pageRequest, Member member) {
         var post = postRepository.findById(postId)
                 .orElseThrow(() -> new BaseException(POST_NOT_FOUND));
-        PageRequest pageRequest = PageRequest.of(pageIndex, size, Sort.Direction.DESC, "createAt");
-        return commentRepository.findAllComment(post, pageRequest).stream()
+        var result = commentRepository.findAllComment(post, pageRequest).stream()
                 .map(CommentInfo::from)
                 .toList();
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(member)
+                        .type(COMMENT)
+                        .build()
+        );
+        return result;
     }
 
     @Transactional
@@ -140,6 +186,13 @@ public class PostService {
         comment.changeContent(info.getContent());
         commentRepository.save(comment);
         info.setId(comment.getId());
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(member)
+                        .type(COMMENT)
+                        .build()
+        );
         return info;
     }
 
@@ -154,6 +207,13 @@ public class PostService {
         }
         comment.delete();
         commentRepository.save(comment);
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(member)
+                        .type(COMMENT)
+                        .build()
+        );
     }
 
     @Transactional
@@ -171,40 +231,70 @@ public class PostService {
             post.delete();
             postRepository.save(post);
         }
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(member)
+                        .type(POST_REPORT)
+                        .build()
+        );
     }
 
     @Transactional(readOnly = true)
-    public List<PostInfo> getPosts(String nickname, String dateString, String state, PageRequest pageRequest) {
+    public List<PostInfo> getPostsByAdmin(String nickname, String dateString, String state, PageRequest pageRequest, Member me) {
         LocalDate date = TimeUtil.stringToLocalDate(dateString);
         var member = memberRepository.findByNickname(nickname)
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
         var spec = Specification.where((PostSpecification.equalMember(member))
                 .and(PostSpecification.betweenCreateDate(TimeUtil.startOfDate(date), TimeUtil.endOfDate(date)))
                 .and(PostSpecification.equalState(state)));
-        return postRepository.findAll(spec, pageRequest).stream()
+        var result = postRepository.findAll(spec, pageRequest).stream()
                 .map(PostInfo::from).toList();
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(me)
+                        .type(POST)
+                        .build()
+        );
+        return result;
     }
 
     @Transactional(readOnly = true)
-    public PostInfo getPost(long id) {
+    public PostInfo getPostByAdmin(long id, Member member) {
         var post = postRepository.findById(id)
                 .orElseThrow(() -> new BaseException(POST_NOT_FOUND));
-        return PostInfo.from(post);
+        var result = PostInfo.from(post);
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(member)
+                        .type(POST)
+                        .build()
+        );
+        return result;
     }
 
     @Transactional
-    public void deletePost(long id) {
+    public void deletePostByAdmin(long id, Member member) {
         var post = postRepository.findById(id)
                 .orElseThrow(() -> new BaseException(POST_NOT_FOUND));
         post.delete();
         postRepository.save(post);
         commentRepository.deleteAllComment(post);
         postRepository.deleteAllPostImage(post);
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(member)
+                        .type(POST)
+                        .build()
+        );
     }
 
     @Transactional(readOnly = true)
-    public List<PostReportInfo> getReports(PageRequest pageRequest) {
-        return postReportRepository.findAllPostReport(pageRequest).stream()
+    public List<PostReportInfo> getReportsByAdmin(PageRequest pageRequest, Member member) {
+        var result = postReportRepository.findAllPostReport(pageRequest).stream()
                 .map(postReport -> PostReportInfo.builder()
                         .id(postReport.getId())
                         .content(postReport.getContent())
@@ -213,13 +303,28 @@ public class PostService {
                         .updateAt(postReport.getUpdateAt().toString())
                         .build())
                 .toList();
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(member)
+                        .type(POST_REPORT)
+                        .build()
+        );
+        return result;
     }
 
     @Transactional
-    public void deleteReport(long id) {
+    public void deleteReportByAdmin(long id, Member member) {
         var postReport = postReportRepository.findById(id)
                 .orElseThrow(() -> new BaseException(REPORT_NOT_FOUND));
         postReport.delete();
         postReportRepository.save(postReport);
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(member)
+                        .type(POST_REPORT)
+                        .build()
+        );
     }
 }

@@ -5,10 +5,12 @@ import com.gridge.server.dataManager.member.MemberSpecification;
 import com.gridge.server.service.common.SecurityService;
 import com.gridge.server.common.util.TimeUtil;
 import com.gridge.server.dataManager.member.MemberRepository;
+import com.gridge.server.service.history.event.HistoryEvent;
 import com.gridge.server.service.member.dto.MemberInfo;
 import com.gridge.server.service.member.entity.Member;
 import com.gridge.server.service.sns.KakaoRestClientService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.gridge.server.common.response.BaseResponseState.*;
+import static com.gridge.server.service.history.entity.HistoryType.MEMBER;
 import static com.gridge.server.service.member.entity.MemberState.ACTIVATED;
 import static com.gridge.server.service.member.entity.MemberType.*;
 
@@ -28,6 +31,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final SecurityService securityService;
     private final KakaoRestClientService kakaoRestClientService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void createMember(MemberInfo memberInfo) {
@@ -42,6 +46,13 @@ public class MemberService {
                 .type(LOCAL_USER)
                 .build();
         memberRepository.save(member);
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(member)
+                        .type(MEMBER)
+                        .build()
+        );
     }
 
     @Transactional(readOnly = true)
@@ -60,6 +71,13 @@ public class MemberService {
         }
         member.updateLastLoginAt();
         memberRepository.save(member);
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(member)
+                        .type(MEMBER)
+                        .build()
+        );
         return member;
     }
 
@@ -81,6 +99,13 @@ public class MemberService {
                 .build();
         memberRepository.save(member);
         memberInfo.setId(member.getId());
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(member)
+                        .type(MEMBER)
+                        .build()
+        );
         return memberInfo;
     }
 
@@ -94,17 +119,24 @@ public class MemberService {
         }
         member.updateLastLoginAt();
         memberRepository.save(member);
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(member)
+                        .type(MEMBER)
+                        .build()
+        );
         return member;
     }
 
     @Transactional(readOnly = true)
-    public List<MemberInfo> getMembers(String name, String nickname, String dateString, String state, PageRequest pageRequest) {
+    public List<MemberInfo> getMembersByAdmin(String name, String nickname, String dateString, String state, PageRequest pageRequest, Member me) {
         LocalDate date = TimeUtil.stringToLocalDate(dateString);
         var spec = Specification.where(MemberSpecification.equalName(securityService.twoWayEncrypt(name)))
                 .and(MemberSpecification.equalNickname(securityService.twoWayEncrypt(nickname)))
                 .and(MemberSpecification.betweenCreateDate(TimeUtil.startOfDate(date), TimeUtil.endOfDate(date)))
                 .and(MemberSpecification.equalState(state));
-        return memberRepository.findAll(spec, pageRequest).stream()
+        var info = memberRepository.findAll(spec, pageRequest).stream()
                 .map(member -> MemberInfo.builder()
                         .nickname(securityService.twoWayDecrypt(member.getNickname()))
                         .id(member.getId())
@@ -117,13 +149,21 @@ public class MemberService {
                         .lastLoginAt(member.getLastLoginAt().toString())
                         .build())
                 .toList();
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(me)
+                        .type(MEMBER)
+                        .build()
+        );
+        return info;
     }
 
     @Transactional(readOnly = true)
-    public MemberInfo getMember(long id) {
+    public MemberInfo getMemberByAdmin(long id, Member me) {
         var member = memberRepository.findById(id)
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
-        return MemberInfo.builder()
+        var result = MemberInfo.builder()
                 .nickname(securityService.twoWayDecrypt(member.getNickname()))
                 .id(member.getId())
                 .imageUrl(member.getImageUrl())
@@ -134,13 +174,28 @@ public class MemberService {
                 .updateAt(member.getUpdateAt().toString())
                 .lastLoginAt(member.getLastLoginAt().toString())
                 .build();
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(me)
+                        .type(MEMBER)
+                        .build()
+        );
+        return result;
     }
 
     @Transactional
-    public void suspendMember(long id) {
+    public void suspendMemberByAdmin(long id, Member me) {
         var member = memberRepository.findById(id)
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
         member.suspend();
         memberRepository.save(member);
+
+        eventPublisher.publishEvent(
+                HistoryEvent.builder()
+                        .member(me)
+                        .type(MEMBER)
+                        .build()
+        );
     }
 }

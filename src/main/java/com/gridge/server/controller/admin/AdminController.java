@@ -1,7 +1,7 @@
 package com.gridge.server.controller.admin;
 
+import com.gridge.server.common.exception.AuthorizationException;
 import com.gridge.server.common.response.BaseResponse;
-import com.gridge.server.common.response.BaseResponseState;
 import com.gridge.server.service.member.MemberService;
 import com.gridge.server.service.member.entity.Member;
 import com.gridge.server.service.post.PostService;
@@ -11,7 +11,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
+import static com.gridge.server.common.response.BaseResponseState.AUTHORIZATION_ERROR;
 import static com.gridge.server.common.response.BaseResponseState.SUCCESS;
+import static com.gridge.server.service.member.entity.MemberType.ADMIN;
 
 @RequiredArgsConstructor
 @RestController
@@ -19,7 +21,7 @@ public class AdminController {
     private final MemberService memberService;
     private final PostService postService;
     @GetMapping("/admin/member")
-    public BaseResponse<?> getMembers(
+    public BaseResponse<?> getMembersByAdmin(
             @RequestParam(name = "name") String name,
             @RequestParam(name = "nickname") String nickname,
             @RequestParam(name = "date") @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$") String date,
@@ -28,29 +30,32 @@ public class AdminController {
             @RequestParam(name = "size") int size,
             @RequestAttribute("member") Member member
     ) {
+        checkAdmin(member);
         PageRequest pageRequest = PageRequest.of(pageIndex, size, Sort.Direction.DESC, "createAt");
-        return new BaseResponse<>(memberService.getMembers(name, nickname, date, state, pageRequest));
+        return new BaseResponse<>(memberService.getMembersByAdmin(name, nickname, date, state, pageRequest, member));
     }
 
     @GetMapping("/admin/member/{id}")
-    public BaseResponse<?> getMember(
+    public BaseResponse<?> getMemberByAdmin(
             @PathVariable(name = "id") long id,
             @RequestAttribute("member") Member member
     ) {
-        return new BaseResponse<>(memberService.getMember(id));
+        checkAdmin(member);
+        return new BaseResponse<>(memberService.getMemberByAdmin(id, member));
     }
 
     @PatchMapping("/admin/member/{id}/suspend")
-    public BaseResponse<?> updateMember(
+    public BaseResponse<?> suspendMemberByAdmin(
             @PathVariable(name = "id") long id,
             @RequestAttribute("member") Member member
     ) {
-        memberService.suspendMember(id);
+        checkAdmin(member);
+        memberService.suspendMemberByAdmin(id, member);
         return new BaseResponse<>(SUCCESS);
     }
 
     @GetMapping("/admin/post")
-    public BaseResponse<?> getPosts(
+    public BaseResponse<?> getPostsByAdmin(
             @RequestParam(name = "nickname") String nickname,
             @RequestParam(name = "date") @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$") String date,
             @RequestParam(name = "state") @Pattern(regexp = "^(DELETED|NOT_DELETED)$") String state,
@@ -58,43 +63,54 @@ public class AdminController {
             @RequestParam(name = "size") int size,
             @RequestAttribute("member") Member member
     ){
+        checkAdmin(member);
         PageRequest pageRequest = PageRequest.of(pageIndex, size, Sort.Direction.DESC, "createAt");
-        return new BaseResponse<>(postService.getPosts(nickname, date, state, pageRequest));
+        return new BaseResponse<>(postService.getPostsByAdmin(nickname, date, state, pageRequest, member));
     }
 
     @GetMapping("/admin/post/{id}")
-    public BaseResponse<?> getPost(
+    public BaseResponse<?> getPostByAdmin(
             @PathVariable(name = "id") long id,
             @RequestAttribute("member") Member member
     ) {
-        return new BaseResponse<>(postService.getPost(id));
+        checkAdmin(member);
+        return new BaseResponse<>(postService.getPostByAdmin(id, member));
     }
 
     @DeleteMapping("/admin/post/{id}")
-    public BaseResponse<?> deletePost(
+    public BaseResponse<?> deletePostByAdmin(
             @PathVariable(name = "id") long id,
             @RequestAttribute("member") Member member
     ) {
-        postService.deletePost(id);
+        checkAdmin(member);
+        postService.deletePostByAdmin(id, member);
         return new BaseResponse<>(SUCCESS);
     }
 
     @GetMapping("/admin/report")
-    public BaseResponse<?> getReports(
+    public BaseResponse<?> getReportsByAdmin(
             @RequestParam(name = "pageIndex") int pageIndex,
             @RequestParam(name = "size") int size,
             @RequestAttribute("member") Member member
     ){
+        checkAdmin(member);
         PageRequest pageRequest = PageRequest.of(pageIndex, size, Sort.Direction.DESC, "createAt");
-        return new BaseResponse<>(postService.getReports(pageRequest));
+        return new BaseResponse<>(postService.getReportsByAdmin(pageRequest, member));
     }
 
     @DeleteMapping("/admin/report/{id}")
-    public BaseResponse<?> deleteReport(
+    public BaseResponse<?> deleteReportByAdmin(
             @PathVariable(name = "id") long id,
             @RequestAttribute("member") Member member
     ) {
-        postService.deleteReport(id);
+        checkAdmin(member);
+        postService.deleteReportByAdmin(id, member);
         return new BaseResponse<>(SUCCESS);
+    }
+
+    private void checkAdmin(Member member) {
+        if (member.getType() != ADMIN) {
+            throw new AuthorizationException(AUTHORIZATION_ERROR);
+        }
     }
 }
