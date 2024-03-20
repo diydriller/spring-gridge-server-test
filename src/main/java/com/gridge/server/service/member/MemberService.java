@@ -1,6 +1,7 @@
 package com.gridge.server.service.member;
 
 import com.gridge.server.common.exception.BaseException;
+import com.gridge.server.dataManager.member.MemberSpecification;
 import com.gridge.server.service.common.SecurityService;
 import com.gridge.server.common.util.TimeUtil;
 import com.gridge.server.dataManager.member.MemberRepository;
@@ -8,9 +9,13 @@ import com.gridge.server.service.member.dto.MemberInfo;
 import com.gridge.server.service.member.entity.Member;
 import com.gridge.server.service.sns.KakaoRestClientService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 
 import static com.gridge.server.common.response.BaseResponseState.*;
@@ -87,5 +92,24 @@ public class MemberService {
             throw new BaseException(NOT_KAKAO_MEMBER);
         }
         return member;
+    }
+
+    @Transactional(readOnly = true)
+    public List<MemberInfo> getMembers(String name, String nickname, String dateString, String state, PageRequest pageRequest) {
+        LocalDate date = TimeUtil.stringToLocalDate(dateString);
+        var spec = Specification.where(MemberSpecification.equalName(securityService.twoWayEncrypt(name)))
+                .and(MemberSpecification.equalNickname(securityService.twoWayEncrypt(nickname)))
+                .and(MemberSpecification.betweenCreateDate(TimeUtil.startOfDate(date), TimeUtil.endOfDate(date)))
+                .and(MemberSpecification.equalState(state));
+        return memberRepository.findAll(spec, pageRequest).stream()
+                .map(member -> MemberInfo.builder()
+                        .nickname(securityService.twoWayDecrypt(member.getNickname()))
+                        .id(member.getId())
+                        .imageUrl(member.getImageUrl())
+                        .name(securityService.twoWayDecrypt(member.getName()))
+                        .phoneNumber(securityService.twoWayDecrypt(member.getPhoneNumber()))
+                        .birthday(member.getBirthday().toString())
+                        .build())
+                .toList();
     }
 }

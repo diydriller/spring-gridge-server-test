@@ -9,7 +9,11 @@ import com.gridge.server.service.common.TokenService;
 import com.gridge.server.service.member.MemberService;
 import com.gridge.server.service.sns.KakaoRestClientService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import static com.gridge.server.common.response.BaseResponseState.SUCCESS;
@@ -68,5 +72,18 @@ public class MemberController {
     ) {
         var member = memberService.kakaoLogin(request.getAccessToken());
         return new BaseResponse<>(tokenService.createToken(member.getId()));
+    }
+
+    @GetMapping("/member")
+    public BaseResponse<?> getMember(
+            @RequestParam(name = "name") String name,
+            @RequestParam(name = "nickname") String nickname,
+            @RequestParam(name = "date") @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$") String date,
+            @RequestParam(name = "state") @Pattern(regexp = "^(ACTIVATED|SUSPENDED|CANCELLED)$") String state,
+            @RequestParam(name = "pageIndex") int pageIndex,
+            @RequestParam(name = "size") int size
+    ) {
+        PageRequest pageRequest = PageRequest.of(pageIndex, size, Sort.Direction.DESC, "createAt");
+        return new BaseResponse<>(memberService.getMembers(name, nickname, date, state, pageRequest));
     }
 }
