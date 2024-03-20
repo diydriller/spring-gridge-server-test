@@ -20,8 +20,7 @@ import java.util.Objects;
 
 import static com.gridge.server.common.response.BaseResponseState.*;
 import static com.gridge.server.service.member.entity.MemberState.ACTIVATED;
-import static com.gridge.server.service.member.entity.MemberType.KAKAO;
-import static com.gridge.server.service.member.entity.MemberType.LOCAL;
+import static com.gridge.server.service.member.entity.MemberType.*;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +39,7 @@ public class MemberService {
                 .name(securityService.twoWayEncrypt(memberInfo.getName()))
                 .birthday(TimeUtil.stringToLocalDate(memberInfo.getBirthday()))
                 .state(ACTIVATED)
-                .type(LOCAL)
+                .type(LOCAL_USER)
                 .build();
         memberRepository.save(member);
     }
@@ -78,7 +77,7 @@ public class MemberService {
                 .imageUrl(memberInfo.getImageUrl())
                 .name(securityService.twoWayEncrypt(memberInfo.getName()))
                 .state(ACTIVATED)
-                .type(KAKAO)
+                .type(KAKAO_USER)
                 .build();
         memberRepository.save(member);
         memberInfo.setId(member.getId());
@@ -90,7 +89,7 @@ public class MemberService {
         var kakaoAccountInfo = kakaoRestClientService.getKakaoInfo(accessToken);
         var member = memberRepository.findByNickname(securityService.twoWayEncrypt(Objects.requireNonNull(kakaoAccountInfo.getEmail())))
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
-        if (member.getType() != KAKAO) {
+        if (member.getType() != KAKAO_USER) {
             throw new BaseException(NOT_KAKAO_MEMBER);
         }
         member.updateLastLoginAt();
