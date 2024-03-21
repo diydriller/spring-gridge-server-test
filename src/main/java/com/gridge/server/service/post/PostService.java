@@ -71,6 +71,8 @@ public class PostService {
         post.setMember(member);
         postRepository.save(post);
         info.setId(post.getId());
+        info.setCreatAt(post.getCreateAt().toString());
+        info.setUpdateAt(post.getUpdateAt().toString());
 
         eventPublisher.publishEvent(
                 HistoryEvent.builder()
@@ -107,6 +109,11 @@ public class PostService {
         post.changeContent(info.getContent());
         postRepository.save(post);
         info.setId(post.getId());
+        info.setImageUrls(post.getPostImages().stream()
+                .map(PostImage::getImageUrl)
+                .toList());
+        info.setCreatAt(post.getCreateAt().toString());
+        info.setUpdateAt(post.getUpdateAt().toString());
 
         eventPublisher.publishEvent(
                 HistoryEvent.builder()

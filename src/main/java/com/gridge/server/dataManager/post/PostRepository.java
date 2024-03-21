@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificationExecutor<Post> {
-    @Query("SELECT p FROM Post p WHERE p.id = :id AND p.deleteState = 'NOT_DELETED'")
+    @Query("SELECT p FROM Post p JOIN FETCH p.postImages WHERE p.id = :id AND p.deleteState = 'NOT_DELETED'")
     Optional<Post> findById(@Param("id") Long id);
     @Query("SELECT p FROM Post p WHERE p.deleteState = 'NOT_DELETED'")
     List<Post> findAllPost(Pageable pageable);
