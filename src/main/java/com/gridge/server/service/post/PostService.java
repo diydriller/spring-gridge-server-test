@@ -233,6 +233,7 @@ public class PostService {
                 .orElseThrow(() -> new BaseException(POST_NOT_FOUND));
         var postReport = PostReport.builder()
                 .content(info.getContent())
+                .deleteState(NOT_DELETED)
                 .build();
         postReport.setPost(post);
         postReport.setMember(member);
