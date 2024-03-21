@@ -21,7 +21,11 @@ public class BaseInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        String token = request.getHeader(ACCESS_TOKEN).replace(TOKEN_PREFIX, "");
+        String token = request.getHeader(ACCESS_TOKEN);
+        if(token == null){
+            throw new AuthenticationException(AUTHENTICATION_ERROR);
+        }
+        token = token.replace(TOKEN_PREFIX, "");
         if(token.isEmpty()){
             throw new AuthenticationException(AUTHENTICATION_ERROR);
         }
