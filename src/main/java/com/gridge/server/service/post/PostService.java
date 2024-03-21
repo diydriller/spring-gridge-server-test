@@ -255,7 +255,7 @@ public class PostService {
     @Transactional(readOnly = true)
     public List<PostInfo> getPostsByAdmin(String nickname, String dateString, String state, PageRequest pageRequest, Member me) {
         LocalDate date = TimeUtil.stringToLocalDate(dateString);
-        var member = memberRepository.findByNickname(nickname)
+        var member = memberRepository.findByNickname(securityService.twoWayEncrypt(nickname))
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
         var spec = Specification.where((PostSpecification.equalMember(member))
                 .and(PostSpecification.betweenCreateDate(TimeUtil.startOfDate(date), TimeUtil.endOfDate(date)))
