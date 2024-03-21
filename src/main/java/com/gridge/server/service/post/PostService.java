@@ -154,6 +154,8 @@ public class PostService {
         comment.setPost(post);
         commentRepository.save(comment);
         info.setId(comment.getId());
+        info.setCreatedAt(comment.getCreateAt().toString());
+        info.setUpdatedAt(comment.getUpdateAt().toString());
 
         eventPublisher.publishEvent(
                 HistoryEvent.builder()
@@ -193,6 +195,8 @@ public class PostService {
         comment.changeContent(info.getContent());
         commentRepository.save(comment);
         info.setId(comment.getId());
+        info.setCreatedAt(comment.getCreateAt().toString());
+        info.setUpdatedAt(comment.getUpdateAt().toString());
 
         eventPublisher.publishEvent(
                 HistoryEvent.builder()
